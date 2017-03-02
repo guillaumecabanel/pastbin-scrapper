@@ -10,8 +10,7 @@ class PastebinScrapper
     detected_mails = 0
 
     print "Getting last pastes..."
-    # paste_ids = PastbinScrapper.get_last_pastes
-    paste_ids = ["7H52wNsu", "tsjfjVHq"]
+    paste_ids = PastebinScrapper.get_last_pastes
     puts "ok"
     puts '|_________________________|'
     print '|'
