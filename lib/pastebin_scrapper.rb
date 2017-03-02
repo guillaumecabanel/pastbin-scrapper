@@ -56,7 +56,7 @@ class PastebinScrapper
     html_doc = get_html(url)
     return nil unless html_doc
     pastes = html_doc.search('.maintable a').map do |paste|
-      paste_id = paste[:href]
+      paste_id = paste[:href][1..-1] # delete the '/'
       paste_id if is_id(paste_id)
     end
 
