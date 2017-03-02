@@ -1,32 +1,44 @@
 require 'open-uri'
 require 'nokogiri' # https://github.com/sparklemotion/nokogiri
 
-CORE_URL = "http://pastebin.com/"
-ID_REGEX = /\A\/[\w]{8}\z/
+ID_REGEX = /\A[\w]{8}\z/
 EMAIL_REGEX = /[\w\-\._]+@[\w\-\_]+\.[a-zA-Z]{2,}/
 
-class PastbinScrapper
+class PastebinScrapper
   def self.emails
-    print "Getting last pastes..."
-    paste_ids = PastbinScrapper.get_last_pastes
-    puts "ok"
+    leaks = {}
+    detected_mails = 0
 
+    print "Getting last pastes..."
+    # paste_ids = PastbinScrapper.get_last_pastes
+    paste_ids = ["7H52wNsu", "tsjfjVHq"]
+    puts "ok"
+    puts '|_________________________|'
+    print '|'
     emails = []
     paste_ids.each_with_index do |paste_id, index|
-      print "scanning paste #{index + 1}/#{paste_ids.size}..."
-      raw = PastbinScrapper.get_raw(paste_id)
-      scanned_email = PastbinScrapper.get_emails(raw)
-      if scanned_email.empty?
-        puts "no email"
-      else
-        puts "#{scanned_email.size} emails found at #{CORE_URL}raw#{paste_id}"
+      # print "scanning paste #{index + 1}/#{paste_ids.size}..."
+      raw = self.get_raw(paste_id)
+      scanned_email = self.get_emails(raw)
+
+      detected_mails += scanned_email.size
+
+      if scanned_email.size > 10
+        puts ""
+        puts '#################### SUSPECTED LEAK ####################'
+        puts "# #{scanned_email.size} emails found at #{CORE_URL}raw/#{paste_id} #"
+        puts '########################################################'
+        puts ""
+        leaks[paste_id] = scanned_email.size
       end
-      scanned_email.each do |email|
-        emails << email
-      end
+
+      print '.'
+      print `sleep #{rand(1..5)}`
     end
 
-    emails
+    puts "| #{detected_mails} mails detected."
+
+    leaks
   end
 
   def self.get_emails(raw)
@@ -34,7 +46,7 @@ class PastbinScrapper
   end
 
   def self.get_raw(paste_id)
-    url = "#{CORE_URL}raw#{paste_id}"
+    url = "#{CORE_URL}raw/#{paste_id}"
     raw_file = get_html(url)
     return nil unless raw_file
     raw_file.text
